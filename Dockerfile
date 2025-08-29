@@ -6,8 +6,8 @@ WORKDIR /app
 COPY src/ ./src/
 COPY lib/ ./lib/
 
-# Compile the webhook server
-RUN javac -cp lib/*.jar -d build src/main/java/com/example/webhook/PayPalWebhookServer.java
+# Compile all Java files
+RUN javac -cp lib/*.jar -d build $(find src -name "*.java")
 
 # Expose the port
 EXPOSE 8080
