@@ -3,9 +3,10 @@ package com.example.webhook.utils;
 public class WebhookUtils {
     
     public static boolean isPaymentEvent(String eventType) {
-        return eventType.contains("PAYMENT") || 
-               eventType.contains("CHECKOUT") ||
-               eventType.contains("SALE") ||
-               eventType.equals("PAYMENTS.PAYMENT.CREATED");
+        return eventType.equals("PAYMENT.CAPTURE.COMPLETED");
+    }
+    
+    public static boolean isPayoutEvent(String eventType) {
+        return eventType.equals("PAYMENT.PAYOUTS-ITEM.SUCCEEDED");
     }
 }
