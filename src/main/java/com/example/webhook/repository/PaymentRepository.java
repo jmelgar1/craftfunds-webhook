@@ -2,7 +2,6 @@ package com.example.webhook.repository;
 
 import com.example.webhook.config.DatabaseConfig;
 import com.example.webhook.models.PaymentRecord;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.math.BigDecimal;
@@ -12,9 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PaymentRepository {
-    private static final Gson gson = new Gson();
-    
-    
     public void savePayment(PaymentRecord payment) throws SQLException {
         String insertSQL = """
             INSERT INTO donations (name, amount, date, currency)
