@@ -2,9 +2,10 @@ package com.example.webhook.services;
 
 import com.example.webhook.models.PaymentRecord;
 import com.example.webhook.models.PaymentSummary;
+import com.example.webhook.repository.PaymentRepository;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -12,13 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 public class PaymentService {
-    private final FileService fileService;
+    private final PaymentRepository paymentRepository;
     
-    public PaymentService(FileService fileService) {
-        this.fileService = fileService;
+    public PaymentService(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
     }
     
-    public void savePayment(JsonObject webhook) throws IOException {
+    public void savePayment(JsonObject webhook) throws SQLException {
         PaymentRecord payment = new PaymentRecord();
         payment.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         payment.eventType = webhook.get("event_type").getAsString();
@@ -26,38 +27,32 @@ public class PaymentService {
         
         extractPaymentAmount(payment, webhook);
         
-        List<PaymentRecord> payments = fileService.loadPayments();
-        payments.add(payment);
-        
-        fileService.savePayments(payments);
+        paymentRepository.savePayment(payment);
     }
     
-    public PaymentSummary calculatePaymentSummary() throws IOException {
-        List<PaymentRecord> payments = fileService.loadPayments();
+    public PaymentSummary calculatePaymentSummary() throws SQLException {
+        List<PaymentRecord> payments = paymentRepository.getAllPayments();
+        int paymentCount = paymentRepository.getPaymentCount();
+        String lastPaymentDate = paymentRepository.getLastPaymentTimestamp();
         
         if (payments.isEmpty()) {
             return new PaymentSummary(false, "No payment data found", null, 0, null);
         }
         
         Map<String, Double> balances = new HashMap<>();
-        String lastPaymentDate = null;
         
         for (PaymentRecord payment : payments) {
             try {
                 if (payment.amount != null && payment.currency != null) {
                     double amount = Double.parseDouble(payment.amount);
                     balances.merge(payment.currency, amount, Double::sum);
-                    
-                    if (lastPaymentDate == null || payment.timestamp.compareTo(lastPaymentDate) > 0) {
-                        lastPaymentDate = payment.timestamp;
-                    }
                 }
             } catch (NumberFormatException e) {
                 System.err.println("Invalid payment amount: " + payment.amount);
             }
         }
         
-        return new PaymentSummary(true, "Success", balances, payments.size(), lastPaymentDate);
+        return new PaymentSummary(true, "Success", balances, paymentCount, lastPaymentDate);
     }
     
     private void extractPaymentAmount(PaymentRecord payment, JsonObject webhook) {
