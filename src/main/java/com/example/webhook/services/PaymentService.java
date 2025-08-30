@@ -5,6 +5,7 @@ import com.example.webhook.models.PaymentSummary;
 import com.example.webhook.repository.PaymentRepository;
 import com.google.gson.JsonObject;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -61,7 +62,7 @@ public class PaymentService {
         return paymentRepository.getAllPayments();
     }
     
-    public double getCurrentMonthDonationTotal() throws SQLException {
+    public BigDecimal getCurrentMonthDonationTotal() throws SQLException {
         YearMonth currentMonth = YearMonth.now();
         LocalDate startDate = currentMonth.atDay(1);
         LocalDate endDate = currentMonth.atEndOfMonth();

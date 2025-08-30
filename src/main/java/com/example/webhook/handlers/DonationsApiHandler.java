@@ -8,6 +8,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -75,7 +76,7 @@ public class DonationsApiHandler implements HttpHandler {
     }
     
     private void handleCurrentMonthFund(HttpExchange exchange) throws IOException, SQLException {
-        double totalAmount = paymentService.getCurrentMonthDonationTotal();
+        BigDecimal totalAmount = paymentService.getCurrentMonthDonationTotal();
         
         Map<String, Object> response = new HashMap<>();
         response.put("amount", totalAmount);

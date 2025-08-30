@@ -5,6 +5,7 @@ import com.example.webhook.models.PaymentRecord;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ public class PaymentRepository {
         }
     }
     
-    public double getDonationTotalForPeriod(LocalDate startDate, LocalDate endDate) throws SQLException {
+    public BigDecimal getDonationTotalForPeriod(LocalDate startDate, LocalDate endDate) throws SQLException {
         String totalSQL = "SELECT COALESCE(SUM(amount), 0) FROM donations WHERE date >= ? AND date <= ?";
         
         try (Connection conn = DatabaseConfig.getConnection();
@@ -100,9 +101,10 @@ public class PaymentRepository {
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getDouble(1);
+                    BigDecimal result = rs.getBigDecimal(1);
+                    return result != null ? result : BigDecimal.ZERO;
                 }
-                return 0.0;
+                return BigDecimal.ZERO;
             }
         }
     }
