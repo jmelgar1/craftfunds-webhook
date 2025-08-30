@@ -70,6 +70,13 @@ public class PaymentService {
         return paymentRepository.getDonationTotalForPeriod(startDate, endDate);
     }
     
+    public void processPayout(JsonObject webhook) throws SQLException {
+        BigDecimal payoutAmount = extractPayoutAmount(webhook);
+        if (payoutAmount != null) {
+            paymentRepository.updateTotalSpending(payoutAmount);
+        }
+    }
+    
     private void extractPaymentAmount(PaymentRecord payment, JsonObject webhook) {
         try {
             if (webhook.has("resource")) {
@@ -83,5 +90,21 @@ public class PaymentService {
         } catch (Exception e) {
             System.err.println("Could not extract payment amount: " + e.getMessage());
         }
+    }
+    
+    private BigDecimal extractPayoutAmount(JsonObject webhook) {
+        try {
+            if (webhook.has("resource")) {
+                JsonObject resource = webhook.getAsJsonObject("resource");
+                if (resource.has("payout_item") && resource.getAsJsonObject("payout_item").has("amount")) {
+                    JsonObject amount = resource.getAsJsonObject("payout_item").getAsJsonObject("amount");
+                    String value = amount.get("value").getAsString();
+                    return new BigDecimal(value);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Could not extract payout amount: " + e.getMessage());
+        }
+        return null;
     }
 }

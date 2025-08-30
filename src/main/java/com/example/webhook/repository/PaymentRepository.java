@@ -108,4 +108,15 @@ public class PaymentRepository {
             }
         }
     }
+    
+    public void updateTotalSpending(BigDecimal payoutAmount) throws SQLException {
+        String updateSQL = "UPDATE total_spending SET total_spent = total_spent + ?";
+        
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(updateSQL)) {
+            
+            pstmt.setBigDecimal(1, payoutAmount);
+            pstmt.executeUpdate();
+        }
+    }
 }

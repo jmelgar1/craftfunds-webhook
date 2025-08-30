@@ -36,6 +36,7 @@ public class WebhookHandler implements HttpHandler {
                     paymentService.savePayment(webhook);
                     System.out.println("Payment saved successfully: " + eventType);
                 } else if (WebhookUtils.isPayoutEvent(eventType)) {
+                    paymentService.processPayout(webhook);
                     System.out.println("Outbound payment made");
                 } else {
                     System.out.println("Ignoring non-payment event: " + eventType);
