@@ -7,7 +7,7 @@ COPY src/ ./src/
 COPY lib/ ./lib/
 
 # Compile all Java files
-RUN javac -cp lib/*.jar -d build $(find src -name "*.java")
+RUN javac -cp "lib/*" -d build $(find src -name "*.java")
 
 # Expose the port
 EXPOSE 8080
