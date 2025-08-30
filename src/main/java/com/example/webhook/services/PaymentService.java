@@ -6,7 +6,9 @@ import com.example.webhook.repository.PaymentRepository;
 import com.google.gson.JsonObject;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +55,18 @@ public class PaymentService {
         }
         
         return new PaymentSummary(true, "Success", balances, paymentCount, lastPaymentDate);
+    }
+    
+    public List<PaymentRecord> getAllDonations() throws SQLException {
+        return paymentRepository.getAllPayments();
+    }
+    
+    public double getCurrentMonthDonationTotal() throws SQLException {
+        YearMonth currentMonth = YearMonth.now();
+        LocalDate startDate = currentMonth.atDay(1);
+        LocalDate endDate = currentMonth.atEndOfMonth();
+        
+        return paymentRepository.getDonationTotalForPeriod(startDate, endDate);
     }
     
     private void extractPaymentAmount(PaymentRecord payment, JsonObject webhook) {

@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +86,24 @@ public class PaymentRepository {
                 return rs.getDate("date").toString();
             }
             return null;
+        }
+    }
+    
+    public double getDonationTotalForPeriod(LocalDate startDate, LocalDate endDate) throws SQLException {
+        String totalSQL = "SELECT COALESCE(SUM(amount), 0) FROM donations WHERE date >= ? AND date <= ?";
+        
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(totalSQL)) {
+            
+            pstmt.setDate(1, Date.valueOf(startDate));
+            pstmt.setDate(2, Date.valueOf(endDate));
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble(1);
+                }
+                return 0.0;
+            }
         }
     }
 }
