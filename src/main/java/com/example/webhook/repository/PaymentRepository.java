@@ -15,7 +15,7 @@ public class PaymentRepository {
     
     public void savePayment(PaymentRecord payment) throws SQLException {
         String insertSQL = """
-            INSERT INTO payments (timestamp, event_type, amount, currency, webhook_data)
+            INSERT INTO donations (timestamp, event_type, amount, currency, webhook_data)
             VALUES (?, ?, ?, ?, ?)
         """;
         
@@ -38,7 +38,7 @@ public class PaymentRepository {
     }
     
     public List<PaymentRecord> getAllPayments() throws SQLException {
-        String selectSQL = "SELECT * FROM payments ORDER BY created_at DESC";
+        String selectSQL = "SELECT * FROM donations ORDER BY created_at DESC";
         List<PaymentRecord> payments = new ArrayList<>();
         
         try (Connection conn = DatabaseConfig.getConnection();
@@ -62,7 +62,7 @@ public class PaymentRepository {
     }
     
     public int getPaymentCount() throws SQLException {
-        String countSQL = "SELECT COUNT(*) FROM payments";
+        String countSQL = "SELECT COUNT(*) FROM donations";
         
         try (Connection conn = DatabaseConfig.getConnection();
              Statement stmt = conn.createStatement();
@@ -76,7 +76,7 @@ public class PaymentRepository {
     }
     
     public String getLastPaymentTimestamp() throws SQLException {
-        String lastPaymentSQL = "SELECT timestamp FROM payments ORDER BY created_at DESC LIMIT 1";
+        String lastPaymentSQL = "SELECT timestamp FROM donations ORDER BY created_at DESC LIMIT 1";
         
         try (Connection conn = DatabaseConfig.getConnection();
              Statement stmt = conn.createStatement();
