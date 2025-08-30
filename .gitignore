@@ -2,6 +2,7 @@
 *.class
 *.jar
 !gson-*.jar
+!mysql-connector-*.jar
 
 # Java package files
 *.war
