@@ -15,30 +15,29 @@ public class PaymentRepository {
     
     public void savePayment(PaymentRecord payment) throws SQLException {
         String insertSQL = """
-            INSERT INTO donations (timestamp, event_type, amount, currency, webhook_data)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO donations (name, amount, date, currency)
+            VALUES (?, ?, ?, ?)
         """;
         
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
-            pstmt.setString(1, payment.timestamp);
-            pstmt.setString(2, payment.eventType);
+            pstmt.setString(1, payment.eventType); // Using eventType as name
             
             if (payment.amount != null) {
-                pstmt.setBigDecimal(3, new java.math.BigDecimal(payment.amount));
+                pstmt.setBigDecimal(2, new java.math.BigDecimal(payment.amount));
             } else {
-                pstmt.setNull(3, Types.DECIMAL);
+                pstmt.setNull(2, Types.DECIMAL);
             }
             
+            pstmt.setDate(3, Date.valueOf(payment.timestamp.substring(0, 10))); // Convert timestamp to date
             pstmt.setString(4, payment.currency);
-            pstmt.setString(5, gson.toJson(payment.webhookData));
             
             pstmt.executeUpdate();
         }
     }
     
     public List<PaymentRecord> getAllPayments() throws SQLException {
-        String selectSQL = "SELECT * FROM donations ORDER BY created_at DESC";
+        String selectSQL = "SELECT * FROM donations ORDER BY date DESC";
         List<PaymentRecord> payments = new ArrayList<>();
         
         try (Connection conn = DatabaseConfig.getConnection();
@@ -47,12 +46,12 @@ public class PaymentRepository {
             
             while (rs.next()) {
                 PaymentRecord payment = new PaymentRecord();
-                payment.timestamp = rs.getString("timestamp");
-                payment.eventType = rs.getString("event_type");
+                payment.timestamp = rs.getDate("date").toString();
+                payment.eventType = rs.getString("name");
                 payment.amount = rs.getBigDecimal("amount") != null ? 
                     rs.getBigDecimal("amount").toString() : null;
                 payment.currency = rs.getString("currency");
-                payment.webhookData = gson.fromJson(rs.getString("webhook_data"), JsonObject.class);
+                payment.webhookData = new JsonObject(); // Empty since no webhook_data column
                 
                 payments.add(payment);
             }
@@ -76,14 +75,14 @@ public class PaymentRepository {
     }
     
     public String getLastPaymentTimestamp() throws SQLException {
-        String lastPaymentSQL = "SELECT timestamp FROM donations ORDER BY created_at DESC LIMIT 1";
+        String lastPaymentSQL = "SELECT date FROM donations ORDER BY date DESC LIMIT 1";
         
         try (Connection conn = DatabaseConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(lastPaymentSQL)) {
             
             if (rs.next()) {
-                return rs.getString("timestamp");
+                return rs.getDate("date").toString();
             }
             return null;
         }
